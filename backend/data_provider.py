@@ -1,5 +1,8 @@
+import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
+
+DB_URL = os.getenv("DB_URL")
 
 class DataProvider:
     def __init__(self, db_url):

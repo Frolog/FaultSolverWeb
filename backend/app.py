@@ -7,6 +7,10 @@ app = Flask(__name__)
 dp = DataProvider(db_url="postgresql://postgres:frolog@127.0.0.1:5432/faultsolver_db")
 
 # --- Routes ---
+@app.route("/")
+def home():
+    return "FaultSolver API is running"
+
 @app.route("/projects")
 def projects():
     return jsonify(dp.get_projects())
