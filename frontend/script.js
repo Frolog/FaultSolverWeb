@@ -1,3 +1,4 @@
+console.log("🚀 script.js loaded");
 const API = "http://127.0.0.1:5000";
 
 const tree = document.getElementById("tree");
@@ -21,28 +22,32 @@ function addNode(text, level, onClick) {
 
 // Load projects first
 async function load() {
+    console.log("📡 load() started");
     const projects = await fetchJSON(`${API}/projects`);
-
+    console.log("📁 projects:", projects);
+    
     projects.forEach(p => {
 
         addNode("📁 " + p.name, 0, async () => {
 
-            const systems = await fetchJSON(`${API}/systems/${p.name}`);
+            // ✅ FIX: use ID
+            const systems = await fetchJSON(`${API}/systems/${p.id}`);
 
             systems.forEach(s => {
 
                 addNode("🧩 " + s.name, 1, async () => {
 
-                    const subs = await fetchJSON(`${API}/subassemblies/${p.name}/${s.name}`);
+                    // ✅ FIX: use system ID
+                    const subs = await fetchJSON(`${API}/subassemblies/${s.id}`);
 
                     subs.forEach(sub => {
 
                         addNode("🔧 " + sub.name, 2, async () => {
 
-                            const faults = await fetchJSON(`${API}/faults/${sub.name}`);
+                            // ✅ FIX: use subassembly ID
+                            const faults = await fetchJSON(`${API}/faults/${sub.id}`);
 
                             showFaults(faults);
-
                         });
 
                     });

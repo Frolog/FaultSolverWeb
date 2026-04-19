@@ -1,5 +1,6 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
+import os
 
 from backend.data_provider import DataProvider
 from backend.routes.projects import projects_bp
@@ -17,10 +18,27 @@ def create_app():
     # --- Blueprints ---
     app.register_blueprint(projects_bp)
 
-    # --- Routes ---
+    # =========================
+    # FRONTEND SERVING
+    # =========================
+
     @app.route("/")
-    def home():
-        return "FaultSolver API running (PRODUCTION STRUCTURE)"
+    def serve_frontend():
+        return send_from_directory(
+            os.path.join(os.path.dirname(__file__), "..", "frontend"),
+            "index.html"
+        )
+
+    @app.route("/<path:path>")
+    def serve_static(path):
+        return send_from_directory(
+            os.path.join(os.path.dirname(__file__), "..", "frontend"),
+            path
+        )
+
+    # =========================
+    # API ROUTES
+    # =========================
 
     @app.route("/projects")
     def projects():
