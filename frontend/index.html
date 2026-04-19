@@ -1,31 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Fault Solver Web</title>
-<link rel="stylesheet" href="style.css">
+<title>Fault Solver</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+.header {
+    padding: 12px;
+    background: #1e293b;
+    font-size: 18px;
+}
+
+.container {
+    display: flex;
+    height: 95vh;
+}
+
+/* LEFT TREE */
+.sidebar {
+    width: 320px;
+    background: #020617;
+    border-right: 1px solid #334155;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.node {
+    padding: 6px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.node:hover {
+    background: #1e293b;
+}
+
+/* RIGHT PANEL */
+.content {
+    flex: 1;
+    padding: 20px;
+}
+
+.card {
+    background: #1e293b;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+}
+
+.title {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+</style>
+
 </head>
+
 <body>
-<h2>Fault Solver Web Demo</h2>
 
-<label>Project:</label>
-<select id="project"></select>
+<div class="header">
+🚀 Fault Solver System
+</div>
 
-<label>System:</label>
-<select id="system" disabled></select>
+<div class="container">
 
-<label>Subassembly:</label>
-<select id="sub" disabled></select>
+    <div class="sidebar" id="tree"></div>
 
-<label>Card:</label>
-<select id="card" disabled></select>
+    <div class="content" id="content">
+        <div class="title">Select item from tree</div>
+    </div>
 
-<label>Fault:</label>
-<select id="fault" disabled></select>
-
-<h3>Steps:</h3>
-<ol id="steps_list"></ol>
+</div>
 
 <script src="script.js"></script>
+
 </body>
 </html>
