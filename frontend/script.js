@@ -1,4 +1,5 @@
 console.log("🚀 script.js loaded");
+
 const API = "http://127.0.0.1:5000";
 
 const tree = document.getElementById("tree");
@@ -9,45 +10,64 @@ async function fetchJSON(url) {
     return await res.json();
 }
 
-function addNode(text, level, onClick) {
+function addNode(parent, text, level, onClick) {
+    const wrapper = document.createElement("div");
+
     const div = document.createElement("div");
     div.className = "node";
     div.style.paddingLeft = (level * 15) + "px";
     div.innerText = text;
 
-    div.onclick = onClick;
+    wrapper.appendChild(div);
+    parent.appendChild(wrapper);
 
-    tree.appendChild(div);
+    let expanded = false;
+    let childrenContainer = null;
+
+    div.onclick = async () => {
+        if (expanded) {
+            childrenContainer.remove();
+            expanded = false;
+            return;
+        }
+
+        childrenContainer = document.createElement("div");
+        wrapper.appendChild(childrenContainer);
+
+        await onClick(childrenContainer);
+
+        expanded = true;
+    };
 }
 
-// Load projects first
+// Load projects
 async function load() {
     console.log("📡 load() started");
+
+    tree.innerHTML = "";
+
     const projects = await fetchJSON(`${API}/projects`);
     console.log("📁 projects:", projects);
-    
+
     projects.forEach(p => {
 
-        addNode("📁 " + p.name, 0, async () => {
+        addNode(tree, "📁 " + p.name, 0, async (projectContainer) => {
 
-            // ✅ FIX: use ID
             const systems = await fetchJSON(`${API}/systems/${p.id}`);
 
             systems.forEach(s => {
 
-                addNode("🧩 " + s.name, 1, async () => {
+                addNode(projectContainer, "🧩 " + s.name, 1, async (systemContainer) => {
 
-                    // ✅ FIX: use system ID
                     const subs = await fetchJSON(`${API}/subassemblies/${s.id}`);
 
                     subs.forEach(sub => {
 
-                        addNode("🔧 " + sub.name, 2, async () => {
+                        addNode(systemContainer, "🔧 " + sub.name, 2, async () => {
 
-                            // ✅ FIX: use subassembly ID
                             const faults = await fetchJSON(`${API}/faults/${sub.id}`);
-
                             showFaults(faults);
+
                         });
 
                     });
