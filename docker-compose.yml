@@ -1,0 +1,54 @@
+
+services:
+  # בסיס הנתונים
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: frolog
+      POSTGRES_DB: faultsolver_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # מתווך ההודעות
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  # שרת ה-Flask
+  backend:
+    build: 
+      context: .
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    command: python -m backend.app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+      - redis
+    environment:
+       - DATABASE_URL=postgresql://postgres:frolog@db:5432/faultsolver_db
+       - CELERY_BROKER_URL=redis://redis:6379/0
+  # ה-Worker של Celery
+  worker:
+    build:
+      context: .
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    command: celery -A backend.app:celery_app worker --loglevel=info
+    depends_on:
+      - redis
+      - db
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://postgres:frolog@db:5432/faultsolver_db
+
+volumes:
+  postgres_data:
