@@ -93,13 +93,15 @@ def create_app():
         logger.info(f"Task queued: {task.id} for sid: {sid}")
         return jsonify({"task_id": task.id}), 202
 
-    @app.route("/tasks/status/<task_id>")
+    @app.route('/tasks/status/<task_id>')
     def get_task_status(task_id):
-        task_result = fetch_faults_task.AsyncResult(task_id)
-        result_data = {"task_id": task_id, "state": task_result.state}
-        if task_result.state == 'SUCCESS':
-            result_data["result"] = task_result.result
-        return jsonify(result_data)
+    # פונקציה שבודקת ב-Redis מה מצב המשימה של Celery
+        task = celery_app.AsyncResult(task_id)
+        response = {
+        "state": task.state, # PENDING, PROGRESS, SUCCESS, FAILURE
+        "result": task.result if task.state == 'SUCCESS' else None
+    }
+        return jsonify(response)
 
     return app, socketio
 

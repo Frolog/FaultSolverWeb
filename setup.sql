@@ -21,4 +21,4 @@ CREATE TABLE subassemblies (
 -- הכנסת נתוני דוגמה כדי שיהיה מה לראות ב-GUI
 INSERT INTO projects (name) VALUES ('Project Alpha'), ('Project Beta');
 INSERT INTO systems (project_id, name) VALUES (1, 'Main Control Unit'), (1, 'Navigation System');
-INSERT INTO subassemblies (system_id, name) VALUES (1, 'Power Supply'), (1, 'CPU Board');
+INSERT INTO subassemblies (system_id, name) VALUES (1, 'Power Supply'), (1, 'CPU Board');ד

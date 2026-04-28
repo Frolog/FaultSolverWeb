@@ -12,7 +12,7 @@ export function renderFaults(container, faults) {
         // הוספת סטייל קטן כדי לזהות שזה הגיע מהמודול החדש
         div.style.borderLeft = "4px solid #38bdf8"; 
         div.innerText = f;
-        container.appendChild(div);
+        container.appendדChild(div);
     });
 
     console.log("✅ FaultRenderer module executed");
