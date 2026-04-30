@@ -111,17 +111,59 @@
                 transform: rotate(360deg);
             }
         }
+
+        .expand-btn {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            color: #475569;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .expand-btn:hover {
+            background-color: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .expand-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .tree-icon {
+            display: inline-block;
+            width: 20px;
+            cursor: pointer;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+
+        .tree-item-header:hover .tree-icon {
+            color: #2563eb;
+        }
     </style>
 </head>
 
 <body>
 
     <div class="header">
-        🚀 Fault Solver System <span style="font-size: 12px; color: #94a3b8;">(Celery Powered)</span>
+        Fault Solver System <span style="font-size: 12px; color: #94a3b8;">(Celery Powered)</span>
     </div>
 
     <div class="container">
-        <div class="sidebar" id="tree"></div>
+        <div class="sidebar">
+            <button id="expand-all-btn" class="expand-btn"
+                style="width: 100%; margin-bottom: 10px; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                <i class="bi bi-arrows-expand"></i> פתח הכל
+            </button>
+
+            <div id="tree"></div>
+        </div>
 
         <div class="content" id="content">
             <div class="title">בחר פריט מהעץ כדי להציג תקלות</div>
@@ -132,6 +174,95 @@
     <script type="module" src="script.js"></script>
 
     <script>
+        document.addEventListener('click', function (e) {
+            if (e.target && e.target.id === 'expand-all-btn') {
+                expandAllNodes();
+            }
+        });
+
+        async function expandAllNodes() {
+            const btn = document.getElementById('expand-all-btn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = "טוען שכבות...";
+
+            async function run() {
+                // מחפש את כל הדיבים של הכותרות בעץ (התאם את ה-Selector אם צריך)
+                const headers = Array.from(document.querySelectorAll('#tree div'))
+                    .filter(el => {
+                        // אנחנו מחפשים אלמנטים שיש להם בנים פוטנציאליים אבל הם סגורים
+                        const content = el.nextElementSibling;
+                        return el.onclick || el.getAttribute('onclick') || (content && content.style.display === 'none');
+                    });
+
+                if (headers.length === 0) return false;
+
+                let openedCount = 0;
+                for (let h of headers) {
+                    const content = h.nextElementSibling;
+                    if (!content || content.style.display === 'none') {
+                        h.click(); // מדמה לחיצה
+                        openedCount++;
+                    }
+                }
+                return openedCount > 0;
+            }
+
+            // לולאה שרצה עד שאין יותר מה לפתוח
+            let continuing = true;
+            while (continuing) {
+                continuing = await run();
+                if (continuing) await new Promise(r => setTimeout(r, 1000)); // מחכה ל-API
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            console.log("Finished expanding all visible nodes");
+        }
+
+        // הוסף את זה בסוף ה-script
+        document.getElementById('expand-all-btn').addEventListener('click', async function () {
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = "טוען מערכות (305)...";
+
+            async function expandAll() {
+                // 1. מוצא את כל הפריטים שניתן ללחוץ עליהם (פרויקטים ומערכות)
+                // 1. מוצא את כל הפריטים שניתן ללחוץ עליהם
+                // --- שלב 3: סריקת הכותרות ועדכון אייקונים ---
+                const headers = document.querySelectorAll('.tree-item-header');
+                let openedAny = false;
+
+                for (let header of headers) {
+                    const content = header.nextElementSibling;
+                    // חילוץ האייקון מתוך הכותרת הנוכחית
+                    const icon = header.querySelector('.bi-plus-square, .bi-dash-square, .tree-icon');
+
+                    if (!content || content.style.display === 'none') {
+                        header.click();
+
+                        // עדכון ויזואלי של האייקון למינוס (כי הענף נפתח)
+                        if (icon) {
+                            icon.classList.remove('bi-plus-square');
+                            icon.classList.add('bi-dash-square');
+                        }
+
+                        openedAny = true;
+                    }
+                }
+                // 2. אם נפתחו פריטים, מחכים שנייה שה-API יחזיר את הבנים שלהם ומנסים שוב
+                if (openedAny) {
+                    console.log("Found new items, waiting for API...");
+                    await new Promise(r => setTimeout(r, 1000));
+                    return expandAll(); // רקורסיה לשכבה הבאה
+                }
+                return true;
+            }
+
+            await expandAll();
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-arrows-expand"></i> פתח הכל';
+        });
         console.log("✅ HTML Core Loaded");
     </script>
 
